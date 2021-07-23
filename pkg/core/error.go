@@ -35,6 +35,10 @@ var (
 	// ErrNotEnoughtItemsToLock returned when trying to lock a bigger quantity
 	// than the total quantity
 	ErrNotEnoughtItemsToLock = newError("not-enought-items-to-lock")
+
+	// ErrTradeCompleteInvalidStatus returned when trying update the status to completed
+	// but its still in an invalid state
+	ErrTradeCompleteInvalidStatus = newError("trade-complete-invalid-status")
 )
 
 // RestError used as a Rest api call error

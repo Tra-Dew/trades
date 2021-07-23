@@ -11,17 +11,20 @@ import (
 type TradeStatus string
 
 const (
-	// TradeDispatchLockOfferedItems ...
-	TradeDispatchLockOfferedItems TradeStatus = "DispatchLockOfferedItemsPending"
+	// TradeCreated ...
+	TradeCreated TradeStatus = "Created"
 
 	// TradeLockOfferedItemsPending ...
 	TradeLockOfferedItemsPending TradeStatus = "LockOfferedItemsPending"
 
-	// TradeCreated ...
-	TradeCreated TradeStatus = "Created"
+	// TradePending ...
+	TradePending TradeStatus = "Pending"
 
-	// TradeDispatchTradeAcceptedPending ...
-	TradeDispatchTradeAcceptedPending TradeStatus = "DispatchTradeAcceptedPending"
+	// TradeAccepted ...
+	TradeAccepted TradeStatus = "Accepted"
+
+	// TradeAwaitingItemsTrade ...
+	TradeAwaitingItemsTrade TradeStatus = "AwaitingItemsTrade"
 
 	// TradeCompleted ...
 	TradeCompleted TradeStatus = "Completed"
@@ -58,24 +61,42 @@ type ResultTradeOffers struct {
 
 // Repository ...
 type Repository interface {
-	Create(ctx context.Context, trade *TradeOffer) error
-	Update(ctx context.Context, userID string, trade *TradeOffer) error
+	Insert(ctx context.Context, trade *TradeOffer) error
+	Update(ctx context.Context, trade *TradeOffer) error
+	UpdateBulk(ctx context.Context, trade []*TradeOffer) error
 	Get(ctx context.Context, userID string, req *GetTradesOffers) (*ResultTradeOffers, error)
-	GetByID(ctx context.Context, userID, id string) (*Item, error)
+	GetByID(ctx context.Context, userID string, id string) (*TradeOffer, error)
+	GetByIDs(ctx context.Context, ids []string) ([]*TradeOffer, error)
+	GetByStatus(ctx context.Context, status TradeStatus) ([]*TradeOffer, error)
 }
 
 // Service ...
 type Service interface {
 	Create(ctx context.Context, userID, correlationID string, req *CreateTradeOfferRequest) (*CreateTradeOfferResponse, error)
 	Accept(ctx context.Context, userID, correlationID, id string) error
-	Cancel(ctx context.Context, userID, correlationID, id string) error
-	Refuse(ctx context.Context, userID, correlationID, id string) error
-	Get(ctx context.Context, userID, correlationID string, req *GetTradeOffersRequest) (*GetTradeOffersResponse, error)
+	Get(ctx context.Context, userID string, req *GetTradeOffersRequest) (*GetTradeOffersResponse, error)
 	GetByID(ctx context.Context, userID, id string) (*GetTradeOfferResponse, error)
 }
 
+// NewItem ...
+func NewItem(id string, quantity int64) (*Item, error) {
+
+	if id == "" {
+		return nil, core.ErrValidationFailed
+	}
+
+	if quantity < 1 {
+		return nil, core.ErrValidationFailed
+	}
+
+	return &Item{
+		ID:       id,
+		Quantity: quantity,
+	}, nil
+}
+
 // NewTradeOffer ...
-func NewTradeOffer(id, ownerID string, status string, offeredItems, wantedItems []*Item) (*TradeOffer, error) {
+func NewTradeOffer(id, ownerID string, offeredItems, wantedItems []*Item) (*TradeOffer, error) {
 
 	if id == "" {
 		return nil, core.ErrValidationFailed
@@ -96,9 +117,17 @@ func NewTradeOffer(id, ownerID string, status string, offeredItems, wantedItems 
 	return &TradeOffer{
 		ID:           id,
 		OwnerID:      ownerID,
-		Status:       TradeStatus(status),
+		Status:       TradeCreated,
 		OfferedItems: offeredItems,
 		WantedItems:  wantedItems,
 		CreatedAt:    time.Now(),
 	}, nil
+}
+
+// UpdateStatus ...
+func (trade *TradeOffer) UpdateStatus(status TradeStatus) {
+	trade.Status = status
+
+	now := time.Now()
+	trade.UpdatedAt = &now
 }

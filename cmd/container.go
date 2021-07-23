@@ -5,6 +5,7 @@ import (
 
 	"github.com/Tra-Dew/trades/pkg/core"
 	"github.com/Tra-Dew/trades/pkg/trades"
+	"github.com/Tra-Dew/trades/pkg/trades/mongodb"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/sirupsen/logrus"
@@ -21,8 +22,9 @@ type Container struct {
 
 	MongoClient *mongo.Client
 
-	SNS *session.Session
-	SQS *session.Session
+	Producer *core.MessageBrokerProducer
+	SNS      *session.Session
+	SQS      *session.Session
 
 	TradeRepository trades.Repository
 	TradeService    trades.Service
@@ -50,8 +52,9 @@ func NewContainer(settings *core.Settings) *Container {
 
 	container.Authenticate = core.NewAuthenticate(settings.JWT.Secret)
 
-	// container.InventoryRepository = mongodb.NewRepository(container.MongoClient, settings.MongoDB.Database)
-	// container.InventoryController = inventory.NewController(container.Authenticate, container.InventoryRepository)
+	container.TradeRepository = mongodb.NewRepository(container.MongoClient, settings.MongoDB.Database)
+	container.TradeService = trades.NewService(container.TradeRepository)
+	container.TradeController = trades.NewController(container.Authenticate, container.TradeService)
 
 	return container
 }
