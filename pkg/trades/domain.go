@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/Tra-Dew/trades/pkg/core"
+	"github.com/d-leme/tradew-trades/pkg/core"
 )
 
 // TradeStatus ...

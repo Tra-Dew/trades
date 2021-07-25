@@ -4,8 +4,8 @@ import (
 	"context"
 	"reflect"
 
-	"github.com/Tra-Dew/trades/pkg/core"
-	"github.com/Tra-Dew/trades/pkg/trades"
+	"github.com/d-leme/tradew-trades/pkg/core"
+	"github.com/d-leme/tradew-trades/pkg/trades"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )

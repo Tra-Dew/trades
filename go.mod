@@ -1,4 +1,4 @@
-module github.com/Tra-Dew/trades
+module github.com/d-leme/tradew-trades
 
 go 1.16
 

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/Tra-Dew/trades/cmd"
+	"github.com/d-leme/tradew-trades/cmd"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )

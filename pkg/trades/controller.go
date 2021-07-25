@@ -3,7 +3,7 @@ package trades
 import (
 	"net/http"
 
-	"github.com/Tra-Dew/trades/pkg/core"
+	"github.com/d-leme/tradew-trades/pkg/core"
 	"github.com/gin-gonic/gin"
 )
 

@@ -3,11 +3,11 @@ package cmd
 import (
 	"context"
 
-	"github.com/Tra-Dew/trades/pkg/core"
-	"github.com/Tra-Dew/trades/pkg/trades"
-	"github.com/Tra-Dew/trades/pkg/trades/mongodb"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/d-leme/tradew-trades/pkg/core"
+	"github.com/d-leme/tradew-trades/pkg/trades"
+	"github.com/d-leme/tradew-trades/pkg/trades/mongodb"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
