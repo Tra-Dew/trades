@@ -20,8 +20,9 @@ type TradeOfferModel struct {
 
 // CreateTradeOfferRequest ...
 type CreateTradeOfferRequest struct {
-	OfferedItems []*ItemModel `json:"offered_items"`
-	WantedItems  []*ItemModel `json:"wanted_items"`
+	WantedItemsOwnerID string       `json:"wanted_items_owner_id"`
+	OfferedItems       []*ItemModel `json:"offered_items"`
+	WantedItems        []*ItemModel `json:"wanted_items"`
 }
 
 // CreateTradeOfferResponse ...

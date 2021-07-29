@@ -48,7 +48,10 @@ func ItemsLockCompleted(command *cobra.Command, args []string) {
 				}
 			}
 
-			fields := logrus.Fields{"ids": ids}
+			fields := logrus.Fields{
+				"ids":                   ids,
+				"wanted_items_owner_id": message.WantedItemsOwnerID,
+			}
 
 			pendingTrades, err := container.TradeRepository.GetByIDs(ctx, ids)
 			if err != nil {

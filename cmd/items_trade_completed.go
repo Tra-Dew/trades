@@ -44,7 +44,7 @@ func ItemsTradeCompleted(command *cobra.Command, args []string) {
 				logrus.
 					WithError(err).
 					WithFields(fields).
-					Error("error while getting trades by ids")
+					Error("error while getting trades by id")
 				return err
 			}
 

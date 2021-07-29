@@ -38,13 +38,14 @@ type Item struct {
 
 // TradeOffer ...
 type TradeOffer struct {
-	ID           string      `bson:"_id"`
-	OwnerID      string      `bson:"owner_id"`
-	Status       TradeStatus `bson:"status"`
-	OfferedItems []*Item     `bson:"offered_items"`
-	WantedItems  []*Item     `bson:"wanted_items"`
-	CreatedAt    time.Time   `bson:"created_at"`
-	UpdatedAt    *time.Time  `bson:"updated_at"`
+	ID                 string      `bson:"_id"`
+	OwnerID            string      `bson:"owner_id"`
+	WantedItemsOwnerID string      `bson:"wanted_items_owner_id"`
+	Status             TradeStatus `bson:"status"`
+	OfferedItems       []*Item     `bson:"offered_items"`
+	WantedItems        []*Item     `bson:"wanted_items"`
+	CreatedAt          time.Time   `bson:"created_at"`
+	UpdatedAt          *time.Time  `bson:"updated_at"`
 }
 
 // GetTradesOffers ...
@@ -96,13 +97,17 @@ func NewItem(id string, quantity int64) (*Item, error) {
 }
 
 // NewTradeOffer ...
-func NewTradeOffer(id, ownerID string, offeredItems, wantedItems []*Item) (*TradeOffer, error) {
+func NewTradeOffer(id, ownerID, wantedItemsOwnerID string, offeredItems, wantedItems []*Item) (*TradeOffer, error) {
 
 	if id == "" {
 		return nil, core.ErrValidationFailed
 	}
 
 	if ownerID == "" {
+		return nil, core.ErrValidationFailed
+	}
+
+	if wantedItemsOwnerID == "" {
 		return nil, core.ErrValidationFailed
 	}
 
@@ -115,12 +120,13 @@ func NewTradeOffer(id, ownerID string, offeredItems, wantedItems []*Item) (*Trad
 	}
 
 	return &TradeOffer{
-		ID:           id,
-		OwnerID:      ownerID,
-		Status:       TradeCreated,
-		OfferedItems: offeredItems,
-		WantedItems:  wantedItems,
-		CreatedAt:    time.Now(),
+		ID:                 id,
+		OwnerID:            ownerID,
+		WantedItemsOwnerID: wantedItemsOwnerID,
+		Status:             TradeCreated,
+		OfferedItems:       offeredItems,
+		WantedItems:        wantedItems,
+		CreatedAt:          time.Now(),
 	}, nil
 }
 

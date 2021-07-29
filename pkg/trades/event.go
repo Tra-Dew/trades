@@ -10,32 +10,26 @@ type ItemEventModel struct {
 
 // TradeOfferCreatedEvent ...
 type TradeOfferCreatedEvent struct {
-	ID           string            `json:"id"`
-	OwnerID      string            `json:"owner_id"`
-	Status       string            `json:"status"`
-	OfferedItems []*ItemEventModel `json:"offered_items"`
-	WantedItems  []*ItemEventModel `json:"wanted_items"`
-	CreatedAt    time.Time         `json:"created_at"`
-}
-
-// ItemLockCompletedEvent ...
-type ItemLockCompletedEvent struct {
-	ID        string    `json:"id"`
-	LockedBy  string    `json:"locked_by"`
-	Quantity  int64     `json:"quantity"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID                 string            `json:"id"`
+	OwnerID            string            `json:"owner_id"`
+	WantedItemsOwnerID string            `json:"wanted_items_owner_id"`
+	OfferedItems       []*ItemEventModel `json:"offered_items"`
+	WantedItems        []*ItemEventModel `json:"wanted_items"`
+	CreatedAt          time.Time         `json:"created_at"`
 }
 
 // ItemsLockCompletedEvent ...
 type ItemsLockCompletedEvent struct {
-	Items []*ItemLockCompletedEvent `json:"items"`
+	LockedBy string `json:"locked_by"`
 }
 
 // TradeOfferAcceptedEvent ...
 type TradeOfferAcceptedEvent struct {
-	ID          string            `json:"id"`
-	OwnerID     string            `json:"owner_id"`
-	WantedItems []*ItemEventModel `json:"wanted_items"`
+	ID                 string            `json:"id"`
+	OwnerID            string            `json:"owner_id"`
+	WantedItemsOwnerID string            `json:"wanted_items_owner_id"`
+	OfferedItems       []*ItemEventModel `json:"offered_items"`
+	WantedItems        []*ItemEventModel `json:"wanted_items"`
 }
 
 // ItemsTradeCompletedEvent ...
@@ -61,20 +55,21 @@ func ParseItemsToItemSliceModel(items []*Item) []*ItemEventModel {
 // ParseTradeToTradeOfferCreatedEvent ...
 func ParseTradeToTradeOfferCreatedEvent(trade *TradeOffer) *TradeOfferCreatedEvent {
 	return &TradeOfferCreatedEvent{
-		ID:           trade.ID,
-		OwnerID:      trade.OwnerID,
-		Status:       string(trade.Status),
-		OfferedItems: ParseItemsToItemSliceModel(trade.OfferedItems),
-		WantedItems:  ParseItemsToItemSliceModel(trade.WantedItems),
-		CreatedAt:    trade.CreatedAt,
+		ID:                 trade.ID,
+		OwnerID:            trade.OwnerID,
+		WantedItemsOwnerID: trade.WantedItemsOwnerID,
+		OfferedItems:       ParseItemsToItemSliceModel(trade.OfferedItems),
+		WantedItems:        ParseItemsToItemSliceModel(trade.WantedItems),
+		CreatedAt:          trade.CreatedAt,
 	}
 }
 
 // ParseTradeToTradeOfferAcceptedEvent ...
 func ParseTradeToTradeOfferAcceptedEvent(trade *TradeOffer) *TradeOfferAcceptedEvent {
 	return &TradeOfferAcceptedEvent{
-		ID:          trade.ID,
-		OwnerID:     trade.OwnerID,
-		WantedItems: ParseItemsToItemSliceModel(trade.WantedItems),
+		ID:                 trade.ID,
+		OwnerID:            trade.OwnerID,
+		WantedItemsOwnerID: trade.WantedItemsOwnerID,
+		WantedItems:        ParseItemsToItemSliceModel(trade.WantedItems),
 	}
 }

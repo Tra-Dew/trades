@@ -34,7 +34,7 @@ func (s *service) Create(
 		return nil, err
 	}
 
-	trade, err := NewTradeOffer(uuid.NewString(), userID, offeredItems, wantedItems)
+	trade, err := NewTradeOffer(uuid.NewString(), userID, req.WantedItemsOwnerID, offeredItems, wantedItems)
 	if err != nil {
 		return nil, err
 	}
