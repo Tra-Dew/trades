@@ -46,6 +46,38 @@ func (s *service) Create(
 		return nil, err
 	}
 
+	lockItemsReq := &inventory.LockItemsRequest{
+		LockedBy:           trade.ID,
+		OwnerID:            trade.OwnerID,
+		WantedItemsOwnerID: trade.WantedItemsOwnerID,
+		OfferedItems:       make([]*inventory.ItemToLock, len(trade.OfferedItems)),
+		WantedItems:        make([]*inventory.ItemToLock, len(trade.WantedItems)),
+	}
+
+	for i, item := range trade.OfferedItems {
+		lockItemsReq.OfferedItems[i] = &inventory.ItemToLock{
+			ID:       item.ID,
+			Quantity: item.Quantity,
+		}
+	}
+
+	for i, item := range trade.WantedItems {
+		lockItemsReq.WantedItems[i] = &inventory.ItemToLock{
+			ID:       item.ID,
+			Quantity: item.Quantity,
+		}
+	}
+
+	if err := s.inventoryService.LockItems(ctx, lockItemsReq); err != nil {
+		return nil, err
+	}
+
+	trade.UpdateStatus(TradePending)
+
+	if s.repository.Update(ctx, trade); err != nil {
+		return nil, err
+	}
+
 	return &CreateTradeOfferResponse{ID: trade.ID}, nil
 }
 
@@ -62,6 +94,32 @@ func (s *service) Accept(ctx context.Context, userID, correlationID, id string) 
 	trade.UpdateStatus(TradeAccepted)
 
 	if err := s.repository.Update(ctx, trade); err != nil {
+		return err
+	}
+
+	tradeItemsReq := &inventory.TradeItemsRequest{
+		TradeID:            trade.ID,
+		OwnerID:            trade.OwnerID,
+		WantedItemsOwnerID: trade.WantedItemsOwnerID,
+		OfferedItems:       make([]*inventory.ItemToTrade, len(trade.OfferedItems)),
+		WantedItems:        make([]*inventory.ItemToTrade, len(trade.WantedItems)),
+	}
+
+	for i, item := range trade.OfferedItems {
+		tradeItemsReq.OfferedItems[i] = &inventory.ItemToTrade{
+			ID:       item.ID,
+			Quantity: item.Quantity,
+		}
+	}
+
+	for i, item := range trade.WantedItems {
+		tradeItemsReq.WantedItems[i] = &inventory.ItemToTrade{
+			ID:       item.ID,
+			Quantity: item.Quantity,
+		}
+	}
+
+	if err := s.inventoryService.TradesItems(ctx, tradeItemsReq); err != nil {
 		return err
 	}
 

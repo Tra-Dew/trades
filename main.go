@@ -20,6 +20,7 @@ func main() {
 		Short: "Starts api handlers",
 		Run:   cmd.Server,
 	}
+
 	root.PersistentFlags().String("settings", "./settings.yml", "path to settings.yaml config file")
 	root.AddCommand(api)
 

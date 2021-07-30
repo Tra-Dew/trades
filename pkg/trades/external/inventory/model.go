@@ -1,6 +1,8 @@
 package inventory
 
-import "context"
+import (
+	"context"
+)
 
 // ItemToLock ...
 type ItemToLock struct {
@@ -10,9 +12,11 @@ type ItemToLock struct {
 
 // LockItemsRequest ...
 type LockItemsRequest struct {
-	LockedBy string
-	OwnerID  string
-	Items    []*ItemToLock
+	LockedBy           string
+	OwnerID            string
+	WantedItemsOwnerID string
+	OfferedItems       []*ItemToLock
+	WantedItems        []*ItemToLock
 }
 
 // ItemToTrade ...

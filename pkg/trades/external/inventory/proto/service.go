@@ -19,19 +19,26 @@ func NewService(client InventoryServiceClient) inventory.Service {
 
 func (s *service) LockItems(ctx context.Context, req *inventory.LockItemsRequest) error {
 
-	items := make([]*ItemToLock, len(req.Items))
+	protoReq := &LockItemsRequest{
+		LockedBy:           req.LockedBy,
+		OwnerID:            req.OwnerID,
+		WantedItemsOwnerID: req.WantedItemsOwnerID,
+		OfferedItems:       make([]*ItemToLock, len(req.OfferedItems)),
+		WantedItems:        make([]*ItemToLock, len(req.WantedItems)),
+	}
 
-	for i, item := range req.Items {
-		items[i] = &ItemToLock{
+	for i, item := range req.OfferedItems {
+		protoReq.OfferedItems[i] = &ItemToLock{
 			Id:       item.ID,
 			Quantity: item.Quantity,
 		}
 	}
 
-	protoReq := &LockItemsRequest{
-		LockedBy: req.LockedBy,
-		OwnerID:  req.OwnerID,
-		Items:    items,
+	for i, item := range req.WantedItems {
+		protoReq.WantedItems[i] = &ItemToLock{
+			Id:       item.ID,
+			Quantity: item.Quantity,
+		}
 	}
 
 	if _, err := s.client.LockItems(context.Background(), protoReq); err != nil {
