@@ -4,17 +4,20 @@ import (
 	"context"
 
 	"github.com/d-leme/tradew-trades/pkg/core"
+	"github.com/d-leme/tradew-trades/pkg/trades/external/inventory"
 	"github.com/google/uuid"
 )
 
 type service struct {
-	repository Repository
+	repository       Repository
+	inventoryService inventory.Service
 }
 
 // NewService ...
-func NewService(repository Repository) Service {
+func NewService(repository Repository, inventoryService inventory.Service) Service {
 	return &service{
-		repository: repository,
+		repository:       repository,
+		inventoryService: inventoryService,
 	}
 }
 

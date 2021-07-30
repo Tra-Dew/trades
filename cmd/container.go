@@ -7,11 +7,14 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/d-leme/tradew-trades/pkg/core"
 	"github.com/d-leme/tradew-trades/pkg/trades"
+	"github.com/d-leme/tradew-trades/pkg/trades/external/inventory"
+	"github.com/d-leme/tradew-trades/pkg/trades/external/inventory/proto"
 	"github.com/d-leme/tradew-trades/pkg/trades/mongodb"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"google.golang.org/grpc"
 )
 
 // Container ...
@@ -22,9 +25,13 @@ type Container struct {
 
 	MongoClient *mongo.Client
 
+	GRPCConnection *grpc.ClientConn
+
 	Producer *core.MessageBrokerProducer
 	SNS      *session.Session
 	SQS      *session.Session
+
+	InventoryService inventory.Service
 
 	TradeRepository trades.Repository
 	TradeService    trades.Service
@@ -38,6 +45,11 @@ func NewContainer(settings *core.Settings) *Container {
 
 	container.Settings = settings
 
+	container.MongoClient = connectMongoDB(settings.MongoDB)
+
+	container.Authenticate = core.NewAuthenticate(settings.JWT.Secret)
+
+	//AWS
 	container.SQS = session.Must(session.NewSession(&aws.Config{
 		Region:   aws.String(settings.SQS.Region),
 		Endpoint: aws.String(settings.SQS.Endpoint),
@@ -48,12 +60,15 @@ func NewContainer(settings *core.Settings) *Container {
 		Endpoint: aws.String(settings.SNS.Endpoint),
 	}))
 
-	container.MongoClient = connectMongoDB(settings.MongoDB)
+	// GRPC
+	container.GRPCConnection = connectGRPC()
+	container.InventoryService = proto.NewService(
+		proto.NewInventoryServiceClient(container.GRPCConnection),
+	)
 
-	container.Authenticate = core.NewAuthenticate(settings.JWT.Secret)
-
+	// Trades
 	container.TradeRepository = mongodb.NewRepository(container.MongoClient, settings.MongoDB.Database)
-	container.TradeService = trades.NewService(container.TradeRepository)
+	container.TradeService = trades.NewService(container.TradeRepository, container.InventoryService)
 	container.TradeController = trades.NewController(container.Authenticate, container.TradeService)
 
 	return container
@@ -89,4 +104,16 @@ func connectMongoDB(conf *core.MongoDBConfig) *mongo.Client {
 	}
 
 	return client
+}
+
+func connectGRPC() *grpc.ClientConn {
+	conn, err := grpc.Dial(":9005", grpc.WithInsecure())
+	if err != nil {
+		logrus.
+			WithError(err).
+			Fatal("error pinging connecting to GRPC endpoint")
+	}
+
+	return conn
+
 }
