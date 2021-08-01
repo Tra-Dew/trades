@@ -36,9 +36,15 @@ var (
 	// than the total quantity
 	ErrNotEnoughtItemsToLock = newError("not-enought-items-to-lock")
 
-	// ErrTradeCompleteInvalidStatus returned when trying update the status to completed
+	// ErrTradeInvalidStatus returned when trying update the status to completed
 	// but its still in an invalid state
-	ErrTradeCompleteInvalidStatus = newError("trade-complete-invalid-status")
+	ErrTradeInvalidStatus = newError("trade-invalid-status")
+
+	// ErrLockFailed returned when an error occured when trying to lock the items
+	ErrLockFailed = newError("lock-failed")
+
+	// ErrItemsTradeFailed returned when an error occured when trying to trade the items
+	ErrItemsTradeFailed = newError("items-trade-failed")
 )
 
 // RestError used as a Rest api call error
@@ -51,6 +57,8 @@ var ErrorStatusMap = map[string]int{
 	ErrValidationFailed.Key:   http.StatusUnprocessableEntity,
 	ErrMalformedJSON.Key:      http.StatusUnprocessableEntity,
 	ErrInvalidCredentials.Key: http.StatusBadRequest,
+	ErrLockFailed.Key:         http.StatusBadRequest,
+	ErrItemsTradeFailed.Key:   http.StatusBadRequest,
 	ErrNotFound.Key:           http.StatusNotFound,
 }
 

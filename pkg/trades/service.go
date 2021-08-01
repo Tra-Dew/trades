@@ -69,12 +69,18 @@ func (s *service) Create(
 	}
 
 	if err := s.inventoryService.LockItems(ctx, lockItemsReq); err != nil {
-		return nil, err
+		trade.UpdateStatus(TradeError)
+
+		if err := s.repository.Update(ctx, trade); err != nil {
+			return nil, err
+		}
+
+		return nil, core.ErrLockFailed
 	}
 
 	trade.UpdateStatus(TradePending)
 
-	if s.repository.Update(ctx, trade); err != nil {
+	if err := s.repository.Update(ctx, trade); err != nil {
 		return nil, err
 	}
 
@@ -87,8 +93,8 @@ func (s *service) Accept(ctx context.Context, userID, correlationID, id string) 
 		return err
 	}
 
-	if trade.Status != TradeCreated {
-		return core.ErrTradeCompleteInvalidStatus
+	if trade.Status != TradePending {
+		return core.ErrTradeInvalidStatus
 	}
 
 	trade.UpdateStatus(TradeAccepted)
@@ -120,6 +126,19 @@ func (s *service) Accept(ctx context.Context, userID, correlationID, id string) 
 	}
 
 	if err := s.inventoryService.TradesItems(ctx, tradeItemsReq); err != nil {
+
+		trade.UpdateStatus(TradeError)
+
+		if err := s.repository.Update(ctx, trade); err != nil {
+			return err
+		}
+
+		return core.ErrItemsTradeFailed
+	}
+
+	trade.UpdateStatus(TradeCompleted)
+
+	if err := s.repository.Update(ctx, trade); err != nil {
 		return err
 	}
 

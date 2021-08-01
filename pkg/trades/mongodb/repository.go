@@ -8,7 +8,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/x/bsonx"
 )
 
 type repositoryMongoDB struct {
@@ -37,23 +36,6 @@ func (repository *repositoryMongoDB) Update(ctx context.Context, trade *trades.T
 	filter := bson.M{"_id": trade.ID}
 
 	_, err := repository.collection.UpdateOne(ctx, filter, trade)
-
-	return err
-}
-
-// UpdateBulk ...
-func (repository *repositoryMongoDB) UpdateBulk(ctx context.Context, trades []*trades.TradeOffer) error {
-
-	models := make([]mongo.WriteModel, len(trades))
-
-	for i, trade := range trades {
-		model := mongo.NewUpdateOneModel()
-		model.SetFilter(bson.M{"_id": trade.ID})
-		model.SetUpdate(bson.M{"$set": trade})
-		models[i] = model
-	}
-
-	_, err := repository.collection.BulkWrite(ctx, models)
 
 	return err
 }
@@ -110,58 +92,8 @@ func (repository *repositoryMongoDB) GetByID(ctx context.Context, userID, id str
 	return result, nil
 }
 
-// GetByIDs ...
-func (repository *repositoryMongoDB) GetByIDs(ctx context.Context, ids []string) ([]*trades.TradeOffer, error) {
-	result := []*trades.TradeOffer{}
-
-	filter := bson.M{"_id": bson.M{"$in": ids}}
-
-	cursor, err := repository.collection.Find(ctx, filter)
-
-	if err != nil {
-		return nil, err
-	}
-
-	defer cursor.Close(ctx)
-
-	if err = cursor.All(ctx, &result); err != nil {
-		return nil, err
-	}
-
-	return result, nil
-}
-
-// GetByStatus ...
-func (repository *repositoryMongoDB) GetByStatus(ctx context.Context, status trades.TradeStatus) ([]*trades.TradeOffer, error) {
-	result := []*trades.TradeOffer{}
-
-	filter := bson.M{"status": status}
-
-	cursor, err := repository.collection.Find(ctx, filter)
-
-	if err != nil {
-		return nil, err
-	}
-
-	defer cursor.Close(ctx)
-
-	if err = cursor.All(ctx, &result); err != nil {
-		return nil, err
-	}
-
-	return result, nil
-}
-
 func (repository *repositoryMongoDB) createIndex() {
-	ctx, close := context.WithTimeout(context.Background(), 10*time.Second)
+	_, close := context.WithTimeout(context.Background(), 10*time.Second)
 	defer close()
 
-	filterName := mongo.IndexModel{
-		Keys: bsonx.Doc{
-			{Key: "name", Value: bsonx.Int32(-1)},
-		},
-		Options: options.Index().SetUnique(false),
-	}
-
-	repository.collection.Indexes().CreateOne(ctx, filterName)
 }

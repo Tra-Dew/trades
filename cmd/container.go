@@ -3,8 +3,6 @@ package cmd
 import (
 	"context"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/d-leme/tradew-trades/pkg/core"
 	"github.com/d-leme/tradew-trades/pkg/trades"
 	"github.com/d-leme/tradew-trades/pkg/trades/external/inventory"
@@ -25,13 +23,8 @@ type Container struct {
 
 	MongoClient *mongo.Client
 
-	GRPCConnection *grpc.ClientConn
-
-	Producer *core.MessageBrokerProducer
-	SNS      *session.Session
-	SQS      *session.Session
-
-	InventoryService inventory.Service
+	InventoryServiceConnection *grpc.ClientConn
+	InventoryService           inventory.Service
 
 	TradeRepository trades.Repository
 	TradeService    trades.Service
@@ -49,21 +42,10 @@ func NewContainer(settings *core.Settings) *Container {
 
 	container.Authenticate = core.NewAuthenticate(settings.JWT.Secret)
 
-	//AWS
-	container.SQS = session.Must(session.NewSession(&aws.Config{
-		Region:   aws.String(settings.SQS.Region),
-		Endpoint: aws.String(settings.SQS.Endpoint),
-	}))
-
-	container.SNS = session.Must(session.NewSession(&aws.Config{
-		Region:   aws.String(settings.SNS.Region),
-		Endpoint: aws.String(settings.SNS.Endpoint),
-	}))
-
 	// GRPC
-	container.GRPCConnection = connectGRPC()
+	container.InventoryServiceConnection = connectGRPC(settings.InventoryService)
 	container.InventoryService = proto.NewService(
-		proto.NewInventoryServiceClient(container.GRPCConnection),
+		proto.NewInventoryServiceClient(container.InventoryServiceConnection),
 	)
 
 	// Trades
@@ -103,11 +85,13 @@ func connectMongoDB(conf *core.MongoDBConfig) *mongo.Client {
 			Fatal("error pinging MongoDB")
 	}
 
+	logrus.Info("connected to mongodb")
+
 	return client
 }
 
-func connectGRPC() *grpc.ClientConn {
-	conn, err := grpc.Dial(":9005", grpc.WithInsecure())
+func connectGRPC(srv *core.GRPCService) *grpc.ClientConn {
+	conn, err := grpc.Dial(srv.URL, grpc.WithInsecure())
 	if err != nil {
 		logrus.
 			WithError(err).

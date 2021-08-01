@@ -22,6 +22,9 @@ const (
 
 	// TradeCompleted ...
 	TradeCompleted TradeStatus = "Completed"
+
+	// TradeError ...
+	TradeError TradeStatus = "Error"
 )
 
 // Item ...
@@ -58,11 +61,8 @@ type ResultTradeOffers struct {
 type Repository interface {
 	Insert(ctx context.Context, trade *TradeOffer) error
 	Update(ctx context.Context, trade *TradeOffer) error
-	UpdateBulk(ctx context.Context, trade []*TradeOffer) error
 	Get(ctx context.Context, userID string, req *GetTradesOffers) (*ResultTradeOffers, error)
 	GetByID(ctx context.Context, userID string, id string) (*TradeOffer, error)
-	GetByIDs(ctx context.Context, ids []string) ([]*TradeOffer, error)
-	GetByStatus(ctx context.Context, status TradeStatus) ([]*TradeOffer, error)
 }
 
 // Service ...

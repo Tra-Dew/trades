@@ -23,16 +23,16 @@ func NewController(authenticate *core.Authenticate, service Service) Controller 
 
 // RegisterRoutes ...
 func (c *Controller) RegisterRoutes(r *gin.RouterGroup) {
-	inventory := r.Group("/inventory-write")
+	trades := r.Group("/trades")
 	{
-		inventory.Use(
+		trades.Use(
 			c.authenticate.Middleware(),
 		)
 
-		inventory.POST("", c.post)
-		inventory.POST(":id", c.accept)
-		inventory.GET("", c.get)
-		inventory.GET(":id", c.getByID)
+		trades.POST("", c.post)
+		trades.POST("accept/:id", c.accept)
+		trades.GET("", c.get)
+		trades.GET(":id", c.getByID)
 	}
 }
 
