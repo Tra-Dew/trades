@@ -35,7 +35,7 @@ func (repository *repositoryMongoDB) Update(ctx context.Context, trade *trades.T
 
 	filter := bson.M{"_id": trade.ID}
 
-	_, err := repository.collection.UpdateOne(ctx, filter, trade)
+	_, err := repository.collection.UpdateOne(ctx, filter, bson.M{"$set": trade})
 
 	return err
 }

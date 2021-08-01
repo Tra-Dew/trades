@@ -10,7 +10,7 @@ type ItemModel struct {
 
 // TradeOfferModel ...
 type TradeOfferModel struct {
-	ID           string       `json:"_id"`
+	ID           string       `json:"id"`
 	Status       string       `json:"status"`
 	OfferedItems []*ItemModel `json:"offered_items"`
 	WantedItems  []*ItemModel `json:"wanted_items"`
