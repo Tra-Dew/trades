@@ -66,6 +66,7 @@ func (c *Container) Controllers() []core.Controller {
 // Close terminates every opened resource
 func (c *Container) Close() {
 	c.MongoClient.Disconnect(context.Background())
+	c.InventoryServiceConnection.Close()
 }
 
 func connectMongoDB(conf *core.MongoDBConfig) *mongo.Client {
