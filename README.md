@@ -1,5 +1,8 @@
 # Tradew Trades
 
+<div align="center"><img src="docs/logo.png" alt="logo" width="300"/></div>
+
+
 ## Overview
 The `trades` microservice is responsible for controlling the trades and calling `inventory-write` microsevice to perform the items swap
 
